@@ -4,7 +4,7 @@ CampusOps is a cloud provisioning, automated deployment, and monitoring project 
 
 ## Current status
 
-The Flask application includes a homepage, SQLite-backed event catalog, event details, and registration with validation and confirmation. The health endpoint is planned. Infrastructure provisioning, deployment automation, and monitoring are also planned.
+The Flask application includes a homepage, SQLite-backed event catalog, event details, and registration with validation and confirmation. A SQLite readiness endpoint is available at `/health`. Infrastructure provisioning, deployment automation, and monitoring are also planned.
 
 ## Run locally
 
@@ -29,13 +29,26 @@ Open an event and choose **Register for this event**. Use synthetic values such 
 
 `CAMPUSOPS_SECRET_KEY` signs Flask session cookies and must be set for registration. Keep it outside version control. On WSL, use `export CAMPUSOPS_SECRET_KEY="$(.venv/bin/python -c 'import secrets; print(secrets.token_hex(32))')"`. Reuse the same securely stored key across deployment workers and restarts. With HTTPS, set `CAMPUSOPS_SECURE_COOKIES=1`. The session holds the CSRF token and most recently confirmed event ID. Changing the secret or clearing the cookie removes browser confirmation state. Saved registrations remain in SQLite.
 
+## Check readiness
+
+With the local server running, use `curl.exe -i http://127.0.0.1:5000/health` in PowerShell or `curl -i http://127.0.0.1:5000/health` in WSL.
+
+- `200 {"status":"ok"}` means Flask could read the expected event and registration schema.
+- `503 {"status":"unavailable"}` means Flask could not read that schema. Check the configured database path, initialization, and permissions in the application environment.
+
+The readiness check leaves attendee data out of the response and does not initialize the database or attempt a write. A successful registration separately verifies the write path.
+
+## Deployment entry point
+
+On Linux, launch Gunicorn from the repository root with the WSGI target `'app.campusops:create_app()'`. Set `CAMPUSOPS_DATABASE` to a persistent absolute path writable by the service user and set a stable `CAMPUSOPS_SECRET_KEY` in the service environment before startup. Run `init-db` explicitly before starting the workers. App creation does not create a database or generate a signing key. A missing key leaves registration unavailable while the health check still reports SQLite readiness. The Nginx and Gunicorn integration will be verified during deployment.
+
 ## Test locally
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Tests use temporary SQLite databases.
+Tests use temporary SQLite databases. To exercise readiness failures safely, run `.\.venv\Scripts\python.exe -m pytest tests/test_health.py -q`.
 
 ## Repository layout
 

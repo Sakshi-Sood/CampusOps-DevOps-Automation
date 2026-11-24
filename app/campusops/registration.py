@@ -128,6 +128,7 @@ def form_too_large(_error):
     ), 413
 
 
+@bp.errorhandler(OSError)
 @bp.errorhandler(sqlite3.Error)
 def registration_database_error(error):
     current_app.logger.error("Registration database operation failed: %s", type(error).__name__)

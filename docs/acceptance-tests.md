@@ -1,17 +1,30 @@
 # CampusOps acceptance checklist
 
-Use this checklist throughout the implementation. All tests are pending until the relevant phase runs. For each run, record the date and time zone, app revision, environment, AWS region if applicable, result, and evidence location. Use synthetic data and redact secrets, student details, account identifiers, and private key material from evidence.
+Use this checklist throughout implementation. Checked items have evidence in the stated environment. For each run, record the date and time zone, app revision, environment, AWS region if applicable, result, and evidence location. Use synthetic data and redact secrets, student details, account identifiers, and private key material from evidence.
 
 ## Phase 2: Application
 
 | Check | Requirements | Procedure and expected result |
 | --- | --- | --- |
-| [ ] AT-01 Event catalog | FR-01 | Open the event listing and a detail page. Each seeded event shows its title, schedule with time zone, venue, description, and a path to registration. An unknown detail page returns 404. |
-| [ ] AT-02 Registration and confirmation | FR-02, FR-05, FR-06 | Submit one valid registration. Confirm the browser redirects only after the row is stored. The final page identifies the event, contains no attendee details, and creates no extra records when refreshed. |
-| [ ] AT-03 Invalid input | FR-02, FR-03, NFR-01 | Submit a missing name, an overlong name, a malformed or overlong email, a missing or invalid CSRF token, and an unknown event ID. Each is rejected and the row count stays unchanged. |
-| [ ] AT-04 Duplicates | FR-04 | Submit an email, then try a case or whitespace variant for the same event. The second registration is rejected. Repeat with two simultaneous submissions into a fresh fixture and confirm exactly one write. The same email can register for another event. |
-| [ ] AT-05 Persistence and health | FR-05, FR-07 | With an isolated test database, save a registration and restart the app. Verify the row remains and `/health` returns 200. Independently point the test app at an unavailable and an uninitialized database and verify 503 without internal details. |
-| [ ] AT-06 Usability | NFR-04 | Check an event page and form at 360 px. Verify there is no horizontal scroll, every input has a label, focus is visible, and the form can be completed with a keyboard. Trigger an error and verify it is clear and associated with the field. |
+| [x] AT-01 Event catalog | FR-01 | Open the event listing and a detail page. Each seeded event shows its title, schedule with time zone, venue, description, and a path to registration. An unknown detail page returns 404. |
+| [x] AT-02 Registration and confirmation | FR-02, FR-05, FR-06 | Submit one valid registration. Confirm the browser redirects only after the row is stored. The final page identifies the event, contains no attendee details, and creates no extra records when refreshed. |
+| [x] AT-03 Invalid input | FR-02, FR-03, NFR-01 | Submit a missing name, an overlong name, a malformed or overlong email, a missing or invalid CSRF token, and an unknown event ID. Each is rejected and the row count stays unchanged. |
+| [x] AT-04 Duplicates | FR-04 | Submit an email, then try a case or whitespace variant for the same event. The second registration is rejected. Repeat with two simultaneous submissions into a fresh fixture and confirm exactly one write. The same email can register for another event. |
+| [x] AT-05 Persistence and health | FR-05, FR-07 | With an isolated test database, save a registration and restart the app. Verify the row remains and `/health` returns 200. Independently point the test app at an unavailable and an uninitialized database and verify 503 without internal details. |
+| [x] AT-06 Usability | NFR-04 | Check an event page and form at 360 px. Verify there is no horizontal scroll, every input has a label, focus is visible, and the form can be completed with a keyboard. Trigger an error and verify it is clear and associated with the field. |
+
+### Local verification evidence
+
+| Check | Evidence |
+| --- | --- |
+| AT-01 | Flask tests verified the seeded listing, schedule, venue, description, registration path, and unknown-event 404. Catalog and detail pages were inspected in Chrome. |
+| AT-02 | A valid POST returned 303 after the row was saved. The confirmation page showed the event without attendee details. Refresh did not add another row. |
+| AT-03 | Flask tests verified rejected names, emails, event IDs, and CSRF tokens without database writes. The validation message and retained field were also checked in Chrome. |
+| AT-04 | Case and whitespace variants returned 409 for the same event. Concurrent requests produced one 303, one 409, and one row. The same email registered successfully for a different event. |
+| AT-05 | An isolated registration survived recreating the Flask app. Tests and loopback HTTP checks verified 200 for initialized SQLite and generic 503 for unavailable and uninitialized SQLite. |
+| AT-06 | Earlier Chrome checks covered the detail page and registration form at 360 px. Verified no horizontal overflow, associated labels and errors, visible keyboard focus, and keyboard submission. |
+
+The full local pytest suite passed with 53 cases. Application readiness was verified directly over loopback. Deployment, Nginx/Gunicorn integration, Nagios checks, and deployed performance remain pending.
 
 ## Phases 3 and 4: Infrastructure and deployment
 

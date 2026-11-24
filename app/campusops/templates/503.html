@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Service unavailable | CampusOps{% endblock %}
+{% block content %}
+<div class="container page">
+  <div class="error-state">
+    <h1>Events temporarily unavailable</h1>
+    <p>CampusOps could not load event information. Please try again later.</p>
+    <a class="button button-primary" href="{{ request.path }}">Try again <span aria-hidden="true">→</span></a>
+  </div>
+</div>
+{% endblock %}

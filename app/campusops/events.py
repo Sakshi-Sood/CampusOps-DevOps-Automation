@@ -1,5 +1,6 @@
 """Public, read-only event catalog views."""
 
+import sqlite3
 from datetime import datetime
 
 from flask import Blueprint, abort, render_template
@@ -61,6 +62,12 @@ def get_event_or_404(event_id):
 @bp.get("/events/<int:event_id>")
 def detail(event_id):
     return render_template("events/detail.html", event=get_event_or_404(event_id))
+
+
+@bp.errorhandler(OSError)
+@bp.errorhandler(sqlite3.Error)
+def events_unavailable(_error):
+    return render_template("503.html"), 503, {"Cache-Control": "no-store"}
 
 
 @bp.app_errorhandler(404)

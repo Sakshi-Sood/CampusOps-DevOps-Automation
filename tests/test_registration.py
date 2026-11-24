@@ -216,6 +216,7 @@ def test_registration_survives_recreating_the_flask_app(app):
     )
 
     assert saved_registrations(restarted) == [(1, NAME, EMAIL)]
+    assert restarted.test_client().get("/health").status_code == 200
     assert submit(restarted.test_client()).status_code == 409
 
 
@@ -249,3 +250,26 @@ def test_oversized_post_returns_branded_413_without_writing(app):
     assert response.status_code == 413
     assert b"Registration form is too large" in response.data
     assert saved_registrations(app) == []
+
+
+def test_failed_registration_write_is_generic_and_does_not_leave_a_row(app):
+    with app.app_context():
+        get_db().execute(
+            """
+            CREATE TRIGGER reject_registration BEFORE INSERT ON registrations
+            BEGIN
+                SELECT RAISE(ABORT, 'private storage diagnostic');
+            END
+            """
+        )
+
+    client = app.test_client()
+    response = submit(client)
+
+    assert response.status_code == 503
+    assert response.cache_control.no_store
+    assert b"Registration unavailable" in response.data
+    assert b"private storage diagnostic" not in response.data
+    assert "Location" not in response.headers
+    assert saved_registrations(app) == []
+    assert client.get("/health").status_code == 200

@@ -52,7 +52,18 @@ def test_catalog_lists_seeded_events_with_dates_venues_and_details_links(seeded_
         assert venue in page
         assert description in page
         assert f'datetime="{starts_at}"' in page
-        assert f'href="/events/{event_ids[slug]}"' in page
+        event_url = f"/events/{event_ids[slug]}"
+        assert f'href="{event_url}"' in page
+
+        detail = seeded_app.test_client().get(event_url)
+        assert detail.status_code == 200
+        detail_page = detail.get_data(as_text=True)
+        assert f"<h1>{title}</h1>" in detail_page
+        assert f'datetime="{starts_at}"' in detail_page
+        assert "UTC+05:30" in detail_page
+        assert venue in detail_page
+        assert description in detail_page
+        assert f'href="{event_url}/register"' in detail_page
     assert page.count("UTC+05:30") == len(SAMPLE_EVENTS)
 
 
