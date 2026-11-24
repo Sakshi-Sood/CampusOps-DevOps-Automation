@@ -1,0 +1,52 @@
+# Local credentials, configuration, and private keys
+.env
+.env.*
+*.pem
+*.ppk
+*.key
+id_rsa
+id_ed25519
+.aws/
+.ssh/
+.vault-pass*
+vault-password*
+vault.local.yml
+ansible/group_vars/*/vault.yml
+
+# Python build, virtualenv, and test output
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local registration data and SQLite journals
+/app/instance/
+/instance/
+*.sqlite*
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Terraform local data, plans, and variables
+.terraform/
+*.tfstate*
+*.tfplan
+*.plan
+*.tfvars
+*.tfvars.json
+!*.example.tfvars
+!*.example.tfvars.json
+crash.log
+crash.*.log
+
+# Generated deployment artifacts
+/.local/
+/ansible/inventory/generated.*
+*.retry
+
+# Private project reference PDFs
+/*_Project_Synopsis.pdf
