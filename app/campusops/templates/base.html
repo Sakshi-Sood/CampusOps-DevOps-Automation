@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}CampusOps{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  {% set endpoint = request.endpoint %}
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('events.home') }}">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        CampusOps
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="{{ url_for('events.home') }}"{% if endpoint == 'events.home' %} aria-current="page"{% endif %}>Home</a>
+        <a href="{{ url_for('events.catalog') }}"{% if endpoint == 'events.catalog' %} aria-current="page"{% elif endpoint == 'events.detail' %} aria-current="location"{% endif %}>Events</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main-content" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <a class="brand" href="{{ url_for('events.home') }}">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        CampusOps
+      </a>
+      <a href="{{ url_for('events.catalog') }}">Browse events <span aria-hidden="true">↗</span></a>
+    </div>
+  </footer>
+</body>
+</html>

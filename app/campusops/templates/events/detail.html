@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} | CampusOps{% endblock %}
+{% block content %}
+<div class="container page">
+  <a class="text-link back-link" href="{{ url_for('events.catalog') }}"><span aria-hidden="true">←</span> All events</a>
+  <article>
+    <header class="detail-heading">
+      <h1>{{ event.title }}</h1>
+    </header>
+    <div class="detail-layout">
+      <div>
+        <img class="detail-photo" src="{{ url_for('static', filename=event_photo(event)) }}"
+             alt="" width="840" height="560">
+        <section class="event-description" aria-labelledby="about-title">
+          <h2 id="about-title">About this event</h2>
+          <p>{{ event.description }}</p>
+        </section>
+      </div>
+      <aside class="event-info" aria-labelledby="info-title">
+        <h2 id="info-title">Event details</h2>
+        <dl>
+          <dt>Date and time</dt>
+          <dd><time datetime="{{ event.starts_at }}">{{ event.starts_at | event_schedule }}</time></dd>
+          <dt>Venue</dt>
+          <dd>{{ event.venue }}</dd>
+        </dl>
+        <a class="button button-primary" href="#registration">Registration <span aria-hidden="true">↓</span></a>
+      </aside>
+    </div>
+    <section class="registration-state" id="registration" tabindex="-1" aria-labelledby="registration-title">
+      <h2 id="registration-title">Registration</h2>
+      <p>Online registration is coming soon.</p>
+    </section>
+  </article>
+</div>
+{% endblock %}

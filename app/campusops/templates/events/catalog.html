@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "events/_cards.html" import event_grid %}
+{% block title %}Events | CampusOps{% endblock %}
+{% block content %}
+<div class="container page">
+  <header class="page-heading">
+    <h1>Campus events</h1>
+  </header>
+  <section aria-labelledby="catalog-title">
+    <div class="section-heading catalog-heading">
+      <h2 id="catalog-title">All events</h2>
+      <p>{{ events | length }} {{ "event" if events | length == 1 else "events" }}</p>
+    </div>
+    {{ event_grid(events) }}
+  </section>
+</div>
+{% endblock %}

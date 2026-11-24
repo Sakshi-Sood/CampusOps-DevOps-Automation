@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import Flask
 
-from . import db
+from . import db, events, seed
 
 
 def create_app(test_config=None):
@@ -19,4 +19,6 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     db.init_app(app)
+    app.register_blueprint(events.bp)
+    app.cli.add_command(seed.seed_events_command)
     return app

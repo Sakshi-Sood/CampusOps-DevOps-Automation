@@ -1,0 +1,25 @@
+{% macro event_grid(events) %}
+  {% if events %}
+    <div class="event-grid">
+      {% for event in events %}
+        <article class="event-card">
+          <img class="event-photo" src="{{ url_for('static', filename=event_photo(event)) }}"
+               alt="" width="840" height="560" loading="lazy">
+          <div class="card-body">
+            <time class="event-date" datetime="{{ event.starts_at }}">{{ event.starts_at | event_schedule }}</time>
+            <h3>{{ event.title }}</h3>
+            <p class="venue">{{ event.venue }}</p>
+            <p class="summary">{{ event.description }}</p>
+            <a class="text-link card-link" href="{{ url_for('events.detail', event_id=event.id) }}"
+               aria-label="View details for {{ event.title }}">View details <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p class="state-title">No events scheduled</p>
+      <p>Check back for new campus events.</p>
+    </div>
+  {% endif %}
+{% endmacro %}
