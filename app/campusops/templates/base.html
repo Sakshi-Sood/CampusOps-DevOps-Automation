@@ -18,7 +18,7 @@
       </a>
       <nav class="site-nav" aria-label="Main navigation">
         <a href="{{ url_for('events.home') }}"{% if endpoint == 'events.home' %} aria-current="page"{% endif %}>Home</a>
-        <a href="{{ url_for('events.catalog') }}"{% if endpoint == 'events.catalog' %} aria-current="page"{% elif endpoint == 'events.detail' %} aria-current="location"{% endif %}>Events</a>
+        <a href="{{ url_for('events.catalog') }}"{% if endpoint == 'events.catalog' %} aria-current="page"{% elif endpoint in ('events.detail', 'registration.register', 'registration.confirmation') %} aria-current="location"{% endif %}>Events</a>
       </nav>
     </div>
   </header>

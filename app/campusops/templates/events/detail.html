@@ -29,7 +29,7 @@
     </div>
     <section class="registration-state" id="registration" tabindex="-1" aria-labelledby="registration-title">
       <h2 id="registration-title">Registration</h2>
-      <p>Online registration is coming soon.</p>
+      <a class="button button-primary" href="{{ url_for('registration.register', event_id=event.id) }}">Register for this event <span aria-hidden="true">?</span></a>
     </section>
   </article>
 </div>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Registration confirmed | CampusOps{% endblock %}
+{% block content %}
+<div class="container page registration-page">
+  <section class="registration-confirmation" aria-labelledby="confirmation-title">
+    <span class="confirmation-mark" aria-hidden="true">✓</span>
+    <h1 id="confirmation-title">Registration confirmed</h1>
+    <p>You’re registered for <strong>{{ event.title }}</strong>.</p>
+    <dl class="confirmation-details">
+      <dt>Date and time</dt>
+      <dd><time datetime="{{ event.starts_at }}">{{ event.starts_at | event_schedule }}</time></dd>
+      <dt>Venue</dt>
+      <dd>{{ event.venue }}</dd>
+    </dl>
+    <div class="confirmation-actions">
+      <a class="button button-primary" href="{{ url_for('events.catalog') }}">Browse events <span aria-hidden="true">→</span></a>
+      <a class="text-link" href="{{ url_for('events.detail', event_id=event.id) }}">Back to event details</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

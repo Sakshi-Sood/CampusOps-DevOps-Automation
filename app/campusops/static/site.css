@@ -243,3 +243,81 @@ h2 { font-size: clamp(2rem, 3.6vw, 3.25rem); }
   .event-description { padding-bottom: 0; }
   .footer-inner { min-height: 76px; }
 }
+
+.registration-state .button { margin-top: .9rem; }
+.registration-page { max-width: 960px; }
+.registration-heading h1 { font-size: clamp(2.65rem, 6vw, 4.7rem); }
+.registration-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.25fr);
+  gap: 1.5rem;
+}
+.registration-event { background: #e9efdf; }
+.registration-event h2 { overflow-wrap: anywhere; }
+.registration-panel, .registration-confirmation {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface);
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+.registration-panel h2 { font-size: 2rem; }
+.registration-form { display: grid; gap: 1.25rem; margin-top: 1.25rem; }
+.form-field { display: grid; gap: .4rem; }
+.form-field label { font-weight: 650; }
+.form-field input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid #7b887d;
+  border-radius: 7px;
+  padding: .55rem .75rem;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+.form-field input[aria-invalid="true"] { border: 2px solid #9b3427; }
+.field-error { color: #902d21; font-size: .9rem; }
+.form-errors {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border-left: 4px solid #9b3427;
+  border-radius: 5px;
+  background: #fbede8;
+  color: #70271e;
+}
+.form-errors h3 { font-size: 1rem; }
+.form-errors ul { margin: .2rem 0 0; padding-left: 1.25rem; }
+.form-errors a { text-underline-offset: .18em; }
+.registration-form .button { justify-self: start; font-family: inherit; border: 0; cursor: pointer; }
+.registration-confirmation { max-width: 680px; margin-inline: auto; }
+.registration-confirmation h1 { font-size: clamp(2.5rem, 6vw, 4.25rem); }
+.registration-confirmation > p { margin-top: .9rem; }
+.confirmation-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-bottom: 1.1rem;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--green);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.confirmation-details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: .55rem 1rem;
+  padding: 1rem 0;
+  border-block: 1px solid var(--line);
+}
+.confirmation-details dt { color: var(--muted); font-weight: 650; }
+.confirmation-details dd { margin: 0; }
+.confirmation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.1rem; }
+
+@media (max-width: 680px) {
+  .registration-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .registration-heading { margin-bottom: 1.3rem; }
+  .confirmation-details { grid-template-columns: minmax(0, 1fr); gap: .15rem; }
+  .confirmation-details dd + dt { margin-top: .55rem; }
+}

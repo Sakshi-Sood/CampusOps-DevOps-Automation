@@ -45,8 +45,7 @@ def catalog():
     return render_template("events/catalog.html", events=events)
 
 
-@bp.get("/events/<int:event_id>")
-def detail(event_id):
+def get_event_or_404(event_id):
     # Python integers can exceed SQLite's signed 64-bit INTEGER range.
     if not 1 <= event_id <= 2**63 - 1:
         abort(404)
@@ -56,7 +55,12 @@ def detail(event_id):
     ).fetchone()
     if event is None:
         abort(404)
-    return render_template("events/detail.html", event=event)
+    return event
+
+
+@bp.get("/events/<int:event_id>")
+def detail(event_id):
+    return render_template("events/detail.html", event=get_event_or_404(event_id))
 
 
 @bp.app_errorhandler(404)

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | CampusOps{% endblock %}
+{% block content %}
+<div class="container page registration-page">
+  <div class="error-state">
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    {% if event_id is defined %}
+      <a class="button button-primary" href="{{ url_for('registration.register', event_id=event_id) }}">Open registration form</a>
+    {% else %}
+      <a class="button button-primary" href="{{ url_for('events.catalog') }}">Browse events</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

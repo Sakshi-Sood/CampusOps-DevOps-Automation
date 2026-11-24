@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Register for {{ event.title }} | CampusOps{% endblock %}
+{% block content %}
+<div class="container page registration-page">
+  <a class="text-link back-link" href="{{ url_for('events.detail', event_id=event.id) }}">
+    <span aria-hidden="true">←</span> Event details
+  </a>
+  <header class="detail-heading registration-heading">
+    <h1>Register for an event</h1>
+  </header>
+  <div class="registration-layout">
+    <aside class="event-info registration-event" aria-labelledby="registration-event-title">
+      <h2 id="registration-event-title">{{ event.title }}</h2>
+      <dl>
+        <dt>Date and time</dt>
+        <dd><time datetime="{{ event.starts_at }}">{{ event.starts_at | event_schedule }}</time></dd>
+        <dt>Venue</dt>
+        <dd>{{ event.venue }}</dd>
+      </dl>
+    </aside>
+    <section class="registration-panel" aria-labelledby="registration-form-title">
+      <h2 id="registration-form-title">Your details</h2>
+      {% if errors %}
+        <div class="form-errors" role="alert">
+          <h3>Review your details</h3>
+          <ul>
+            {% for field, message in errors.items() %}
+              <li><a href="#{{ field }}">{{ message }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <form class="registration-form" method="post" action="{{ url_for('registration.register', event_id=event.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="form-field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" required maxlength="{{ name_limit }}"
+                 value="{{ values.get('name', '') }}"{% if errors.name %} aria-invalid="true" aria-describedby="name-error"{% endif %}>
+          {% if errors.name %}<p class="field-error" id="name-error">{{ errors.name }}</p>{% endif %}
+        </div>
+        <div class="form-field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" required maxlength="{{ email_limit }}"
+                 value="{{ values.get('email', '') }}"{% if errors.email %} aria-invalid="true" aria-describedby="email-error"{% endif %}>
+          {% if errors.email %}<p class="field-error" id="email-error">{{ errors.email }}</p>{% endif %}
+        </div>
+        <button class="button button-primary" type="submit">Confirm registration <span aria-hidden="true">→</span></button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}
