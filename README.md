@@ -4,11 +4,20 @@ CampusOps is a cloud provisioning, automated deployment, and monitoring project 
 
 ## Current status
 
-The Flask application includes a homepage, SQLite-backed event catalog, event details, and registration with validation and confirmation. A SQLite readiness endpoint is available at `/health`. Infrastructure provisioning, deployment automation, and monitoring are also planned.
+The local application provides a seeded campus event catalog, event details, registration with validation and CSRF protection, confirmation, and a SQLite read-readiness endpoint. Cloud provisioning, automated deployment, and infrastructure monitoring are planned.
+
+| Layer | Technology |
+| --- | --- |
+| Application | Python 3.11+, Flask, Jinja, HTML and CSS |
+| Storage | SQLite via Python's standard library |
+| Local verification | pytest and isolated SQLite fixtures |
+| Planned deployment | AWS EC2, Terraform, Ansible, Nginx, Gunicorn, systemd, and Nagios Core |
 
 ## Run locally
 
-Use Python 3.11 or newer. A virtual environment keeps the project's Python packages separate from other projects. Run these commands from the repository root in PowerShell.
+Create a virtual environment in your checkout. The development requirements include the pinned application runtime and pytest. Use a separate environment for each operating system.
+
+### Windows PowerShell
 
 ```powershell
 python -m venv .venv
@@ -16,39 +25,56 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m flask --app app.campusops init-db
 .\.venv\Scripts\python.exe -m flask --app app.campusops seed-events
 $env:CAMPUSOPS_SECRET_KEY = (.\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))").Trim()
+.\.venv\Scripts\python.exe -m flask --app app.campusops check-config
 .\.venv\Scripts\python.exe -m flask --app app.campusops run
 ```
 
-On WSL Ubuntu, create the environment with `python3 -m venv .venv` and use `.venv/bin/python` for the remaining commands. Create separate virtual environments for Windows and Linux if switching between them. WSL is the planned control environment for Linux-based deployment tools.
+### WSL Ubuntu
 
-Open [CampusOps](http://127.0.0.1:5000/) or go directly to [the event catalog](http://127.0.0.1:5000/events). Stop the development server with Ctrl+C. Gunicorn will load the same application factory on the deployed Linux host.
-
-`init-db` creates the tables. `seed-events` inserts missing fictional events by slug. Both commands can be rerun without deleting registrations or overwriting event rows. The default database is `instance/campusops.sqlite3`, outside the application source directory. Set `CAMPUSOPS_DATABASE` to an absolute file path to override it. The planned EC2 deployment will use a persistent path such as `/var/lib/campusops/campusops.sqlite3` outside the release tree. Use synthetic data in local development and tests.
-
-Open an event and choose **Register for this event**. Use synthetic values such as a test attendee name and an address ending in `@example.test`. Try registering the same address for the same event again to see the duplicate response.
-
-`CAMPUSOPS_SECRET_KEY` signs Flask session cookies and must be set for registration. Keep it outside version control. On WSL, use `export CAMPUSOPS_SECRET_KEY="$(.venv/bin/python -c 'import secrets; print(secrets.token_hex(32))')"`. Reuse the same securely stored key across deployment workers and restarts. With HTTPS, set `CAMPUSOPS_SECURE_COOKIES=1`. The session holds the CSRF token and most recently confirmed event ID. Changing the secret or clearing the cookie removes browser confirmation state. Saved registrations remain in SQLite.
-
-## Check readiness
-
-With the local server running, use `curl.exe -i http://127.0.0.1:5000/health` in PowerShell or `curl -i http://127.0.0.1:5000/health` in WSL.
-
-- `200 {"status":"ok"}` means Flask could read the expected event and registration schema.
-- `503 {"status":"unavailable"}` means Flask could not read that schema. Check the configured database path, initialization, and permissions in the application environment.
-
-The readiness check leaves attendee data out of the response and does not initialize the database or attempt a write. A successful registration separately verifies the write path.
-
-## Deployment entry point
-
-On Linux, launch Gunicorn from the repository root with the WSGI target `'app.campusops:create_app()'`. Set `CAMPUSOPS_DATABASE` to a persistent absolute path writable by the service user and set a stable `CAMPUSOPS_SECRET_KEY` in the service environment before startup. Run `init-db` explicitly before starting the workers. App creation does not create a database or generate a signing key. A missing key leaves registration unavailable while the health check still reports SQLite readiness. The Nginx and Gunicorn integration will be verified during deployment.
-
-## Test locally
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r app/requirements-dev.txt
+.venv/bin/python -m flask --app app.campusops init-db
+.venv/bin/python -m flask --app app.campusops seed-events
+export CAMPUSOPS_SECRET_KEY="$(.venv/bin/python -c 'import secrets; print(secrets.token_hex(32))')"
+.venv/bin/python -m flask --app app.campusops check-config
+.venv/bin/python -m flask --app app.campusops run
 ```
 
-Tests use temporary SQLite databases. To exercise readiness failures safely, run `.\.venv\Scripts\python.exe -m pytest tests/test_health.py -q`.
+Open the [event catalog](http://127.0.0.1:5000/events), select an event, and register using synthetic attendee data, such as `attendee@example.test`. Stop the local server with Ctrl+C.
+
+`init-db` creates the schema. `seed-events` inserts missing fictional events by slug. Both commands can be rerun and preserve existing registrations and event rows.
+
+## Environment variables
+
+| Variable | Behavior |
+| --- | --- |
+| `CAMPUSOPS_DATABASE` | Absolute path to the SQLite file. Defaults to `instance/campusops.sqlite3` in the local checkout. Use an external data directory in a deployment, such as `/var/lib/campusops`. |
+| `CAMPUSOPS_SECRET_KEY` | Required for registration. Supply a securely stored random signing key and reuse it across workers and restarts. Keep it outside version control. |
+| `CAMPUSOPS_SECURE_COOKIES` | Set to `1` when serving over HTTPS. Leave unset for loopback HTTP development. |
+
+`check-config` returns a nonzero exit status for a missing or short signing key or a relative database path. It performs no database operations and prints no secret values. Replacing the key or clearing the browser cookie invalidates browser confirmation state. The SQLite records persist.
+
+## Readiness and tests
+
+Run `curl.exe -i http://127.0.0.1:5000/health` in PowerShell or `curl -i http://127.0.0.1:5000/health` in WSL while the local server is running.
+
+- `200 {"status":"ok"}` means Flask could read the initialized event and registration schema.
+- `503 {"status":"unavailable"}` means the database or schema could not be read. Check the configured path, initialization, and permissions in the service environment.
+
+The response is non-cacheable and includes only a status. The probe checks SQLite reads. A successful registration separately verifies the write path. Missing signing-key configuration prevents registration and leaves database-read readiness unchanged.
+
+Run the full test suite with `.\.venv\Scripts\python.exe -m pytest -q` on PowerShell or `.venv/bin/python -m pytest -q` on WSL. Run `python -m pytest tests/test_health.py -q` with the virtual environment active to exercise the health cases. Tests use temporary SQLite databases.
+
+## Deployment handoff
+
+On Linux, Gunicorn will call `app.campusops:create_app()` from the release root. Nginx will proxy requests to Gunicorn through a Unix socket. systemd will supply the service environment and supervise Gunicorn under a dedicated user. Flask's development server is for local use.
+
+Install the application packages from `app/requirements.txt`. The deployment role will need to install and pin Gunicorn separately. Provide a persistent database path writable by the service user and a protected signing key. Run `check-config` and initialize the database before starting workers. Keep the database outside the release directory so replacing code does not replace data.
+
+## Current limitations
+
+The catalog is seeded with fictional events. The demo uses local SQLite on one application host and browser-scoped confirmation without an account or email notification. Use synthetic data over HTTP. Linux service integration, deployment throughput, AWS infrastructure, and Nagios alerting remain to be verified in their implementation phases.
 
 ## Repository layout
 

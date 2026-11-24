@@ -21,7 +21,7 @@
     <section class="registration-panel" aria-labelledby="registration-form-title">
       <h2 id="registration-form-title">Your details</h2>
       {% if errors %}
-        <div class="form-errors" role="alert">
+        <div class="form-errors" role="alert" tabindex="-1" autofocus>
           <h3>Review your details</h3>
           <ul>
             {% for field, message in errors.items() %}

@@ -22,9 +22,9 @@ Use this checklist throughout implementation. Checked items have evidence in the
 | AT-03 | Flask tests verified rejected names, emails, event IDs, and CSRF tokens without database writes. The validation message and retained field were also checked in Chrome. |
 | AT-04 | Case and whitespace variants returned 409 for the same event. Concurrent requests produced one 303, one 409, and one row. The same email registered successfully for a different event. |
 | AT-05 | An isolated registration survived recreating the Flask app. Tests and loopback HTTP checks verified 200 for initialized SQLite and generic 503 for unavailable and uninitialized SQLite. |
-| AT-06 | Earlier Chrome checks covered the detail page and registration form at 360 px. Verified no horizontal overflow, associated labels and errors, visible keyboard focus, and keyboard submission. |
+| AT-06 | Isolated Chrome checks at 360 px and 1440 px covered the event detail, form, validation, and confirmation. Verified no horizontal overflow, associated labels and errors, visible keyboard focus, keyboard submission, and focus on the error summary after a rejected POST. |
 
-The full local pytest suite passed with 53 cases. Application readiness was verified directly over loopback. Deployment, Nginx/Gunicorn integration, Nagios checks, and deployed performance remain pending.
+The full local pytest suite passed with 57 cases. Loopback HTTP verified application readiness. A local smoke test used two separate source directories and processes with the same external SQLite database. Both ran schema initialization and event seeding. The second retained all three events and the original registration. Deployment, Nginx/Gunicorn integration, Nagios checks, and deployed performance remain pending.
 
 ## Phases 3 and 4: Infrastructure and deployment
 

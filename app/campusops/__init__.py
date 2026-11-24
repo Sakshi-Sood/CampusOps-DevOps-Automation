@@ -3,9 +3,26 @@
 import os
 from pathlib import Path
 
-from flask import Flask
+import click
+from flask import Flask, current_app
+from flask.cli import with_appcontext
 
 from . import db, events, health, registration, seed
+
+
+@click.command("check-config")
+@with_appcontext
+def check_config():
+    """Check deployment settings without creating files or printing secrets."""
+    key = current_app.secret_key
+    if not key or len(key.strip()) < 32:
+        raise click.ClickException(
+            "Set CAMPUSOPS_SECRET_KEY to a stable, randomly generated value "
+            "of at least 32 characters."
+        )
+    if not Path(current_app.config["DATABASE"]).is_absolute():
+        raise click.ClickException("Set CAMPUSOPS_DATABASE to an absolute file path.")
+    click.echo("CampusOps configuration check passed.")
 
 
 def create_app(test_config=None):
@@ -26,4 +43,5 @@ def create_app(test_config=None):
     app.register_blueprint(health.bp)
     app.register_blueprint(registration.bp)
     app.cli.add_command(seed.seed_events_command)
+    app.cli.add_command(check_config)
     return app
