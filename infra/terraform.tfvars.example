@@ -1,0 +1,5 @@
+aws_account_id      = "000000000000"
+ubuntu_ami_id       = "ami-00000000000000000"
+admin_ipv4_cidr     = "192.0.2.10/32"
+demo_ipv4_cidrs     = []
+ssh_public_key_path = "~/.ssh/campusops_ed25519.pub"

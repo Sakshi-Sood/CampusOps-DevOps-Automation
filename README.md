@@ -83,6 +83,6 @@ The catalog is seeded with fictional events. The demo uses local SQLite on one a
 | `app/campusops/` | Flask package, database schema, templates, and static assets |
 | `tests/` | Automated tests with isolated databases |
 | `docs/` | [Requirements](docs/requirements.md), [architecture](docs/architecture.md), and [acceptance checks](docs/acceptance-tests.md) |
-| `infra/` | Planned Terraform infrastructure definitions |
+| `infra/` | [Terraform configuration and provisioning review](infra/README.md) |
 | `ansible/` | Planned server configuration and deployment roles |
 | `scripts/` | Planned deployment and inventory automation |

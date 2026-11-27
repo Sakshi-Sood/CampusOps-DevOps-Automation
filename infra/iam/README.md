@@ -1,0 +1,18 @@
+# Proposed CampusOps Terraform IAM access
+
+These JSON files are templates for review. Replace `ACCOUNT_ID`, `OPERATOR_ARN`, and `UBUNTU_AMI_ID` in a private working copy named with the ignored `.local.json` suffix, or stored outside the repository. `OPERATOR_ARN` is the exact IAM user ARN returned by STS, including any IAM path. Use the same reviewed Mumbai AMI ID in the role policy and Terraform inputs.
+
+| Draft | Where it belongs |
+| --- | --- |
+| [Trust policy](trust-policy.json) | Role trust for `CampusOpsTerraformRole`, created with the default IAM path. Allows only the verified IAM operator ARN to call `sts:AssumeRole`. |
+| [Role permission policy](role-permissions.json) | Inline role policy. The draft exceeds the size limit for a single customer-managed policy. |
+| [Operator permission](operator-assume-role.json) | Identity policy for `campusops-operator`. Allows assumption of this role in the expected account. |
+
+The operator's WSL CLI profile provides temporary credentials. Terraform uses them to request a second temporary session as the role. The operator's sign-in rights remain separate from the role's EC2 permissions.
+
+- **Inspection:** Specific EC2 Describe actions let Terraform find the AMI and read resources. Many EC2 Describe APIs require a wildcard resource and have no per-project tag filter in IAM. The policy still restricts these calls to Mumbai. Reads of individual instance and VPC attributes also require the CampusOps resource tag.
+- **Provisioning:** Resource ARNs are scoped to the approved account and region where supported. Creation requires the CampusOps request tag where supported. Child creation checks the VPC tag. Launch requires the pinned AMI, the project subnet/security group/key, a tagged `t3.micro` with IMDSv2, and a tagged encrypted gp3 root volume up to 10 GiB. EC2 creates the interface during launch, so it uses a regional account-scoped interface ARN pattern. Independent interface creation is excluded.
+- **Changes and teardown:** Network changes, instance stop/start, and deletion target project-tagged resources. The role does not grant post-launch changes to instance attributes, metadata options, or CPU credit mode. If a later deployment needs one of these permissions, review the specific operation before granting it. Routes and associations use their parent IDs. The policy permits initial removal of EC2's default outbound rule through the tagged security group. Tag edits cannot remove or rewrite the Project tag in a standalone tagging call.
+- **Limits:** IAM cannot express the intended two-instance count, demo runtime, or budget. The role leaves out IAM administration, NAT, load balancers, managed databases, and KMS policy changes. Confirm that EBS default encryption is not configured with a customer-managed key needing separate permissions. Project tags are a useful lab constraint in this account. They do not prove exclusive ownership when other principals can assign them. The role can change rules on CampusOps security groups. The approved Terraform plan remains responsible for verifying ports and CIDRs.
+
+Review the rendered policy and its action/resource coverage before attaching it. This draft has had local JSON checks. AWS policy evaluation and full provider call coverage remain to be verified during plan and approved infrastructure work. [EC2 authorization reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonec2.html) · [Terraform AWS authentication guidance](https://docs.aws.amazon.com/prescriptive-guidance/latest/terraform-aws-provider-best-practices/security.html)

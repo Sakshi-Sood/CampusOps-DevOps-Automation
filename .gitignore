@@ -6,6 +6,7 @@
 *.key
 id_rsa
 id_ed25519
+campusops_ed25519
 .aws/
 .ssh/
 .vault-pass*
@@ -35,6 +36,7 @@ htmlcov/
 .terraform/
 *.tfstate*
 *.tfplan
+tfplan
 *.plan
 *.tfvars
 *.tfvars.json
@@ -42,6 +44,9 @@ htmlcov/
 !*.example.tfvars.json
 crash.log
 crash.*.log
+
+# Local IAM drafts rendered with account-specific values
+/infra/iam/*.local.json
 
 # Generated deployment artifacts
 /.local/
